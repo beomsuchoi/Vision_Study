@@ -1,0 +1,113 @@
+####우선 지금부터의 가이드는 cuda cuDNN ultralytics python3와 같은 작업환경을 갖춘 상태에서의 내용이다.####
+
+----------------------------------------------------
+
+##작업환경##
+
+----------------------------------------------------
+Ubuntu22.04
+intel i9-14th
+RTX 4070 laptop GPU
+python3(3.10.12)
+ultralytics # 실시간 비전 학습
+cuda 11.8
+cuDNN 8.9.7
+yolo v8n.pt(경량형 모델)
+openCV(4.10.0) - python3
+----------------------------------------------------
+
+##계획##
+
+----------------------------------------------------
+이미지 학습을 위해선 이미지 전처리 과정과 학습된 이미지의 라벨링 과정이 된 데이터셋이 필요하다.
+ai(roboflow, makesense.ai) 버전과 직접 라벨링 한 버전 비교 분석 예정
+그 후 victim box 학습 두 버전 compare, 선택
+cuda, cuDNN, yolo, 가상환경 사용 유,무 등 내 root를 찾는 것이 중요
+----------------------------------------------------
+
+공부 링크
+
+----------------------------------------------------
+https://velog.io/@es_seong/Object-Detection-YOLOV11-AN-OVERVIEW-OF-THE-KEY-ARCHITECTURAL-ENHANCEMENTS-%EC%A0%95%EB%A6%AC(yolo v11)
+https://docs.ultralytics.com/ko/models/#featured-models(ultralytics 홈페이지)
+https://wikidocs.net/215176(학습데이터 만들기)
+https://blog.naver.com/hcw2166/222450900230(이미지 전처리)
+https://dora93.tistory.com/3(윈도우 개발환경)
+https://aeong-dev.tistory.com/2(아나콘다 이용 가상환경)
+
+데이터셋 구성 예시
+dataset/
+├── train/
+│   ├── images/
+│   │   ├── train1.jpg
+│   │   ├── train2.jpg
+│   └── labels/
+│       ├── train1.txt
+│       ├── train2.txt
+├── val/
+│   ├── images/
+│   │   ├── val1.jpg
+│   └── labels/
+│       ├── val1.txt
+└── data.yaml
+
+
+
+cd ~/pet_bottle_dataset  # 해당 폴더로 이동
+nano data.yaml  # 또는 원하는 텍스트 에디터로 생성
+data.yaml 파일 내용:
+
+yamlCopypath: /home/choibeomsu/pet_bottle_dataset
+train: train/images
+val: val/images
+
+# 클래스 목록
+names:
+  0: pet_bottle
+  
+^O가 저장 ^X가 나가는 방법
+
+
+
+LabelImg 실행:
+
+
+초기 설정:
+
+
+오른쪽 메뉴에서 'PascalVOC'를 'YOLO'로 변경
+'Open Dir' 클릭해서 ~/pet_bottle_dataset/train/images 선택
+'Change Save Dir' 클릭해서 ~/pet_bottle_dataset/train/labels 선택
+
+
+라벨링 단계:
+
+
+'w' 키를 눌러 박스 그리기 시작
+페트병 주위를 마우스로 드래그해서 박스 그리기
+클래스 이름으로 'pet_bottle' 입력
+Ctrl+S로 저장
+'d' 키를 눌러 다음 이미지로 이동
+
+주요 단축키:
+
+w: 박스 그리기
+d: 다음 이미지
+a: 이전 이미지
+Ctrl+S: 저장
+del: 박스 삭제
+
+
+
+from ultralytics import YOLO
+
+# 학습된 모델 로드
+model = YOLO('runs/detect/train2/weights/best.pt')
+
+# 웹캠 테스트
+results = model.predict(source=2, show=True)  # 웹캠 번호가 2번
+
+
+
+
+
