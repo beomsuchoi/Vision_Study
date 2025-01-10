@@ -1,0 +1,44 @@
+**launch**
+ros2 launch realsense2_camera rs_launch.py
+
+
+------------------------------------------
+#accel_imu, gyro_imu 사용 가능하게 해주는 코드
+------------------------------------------
+
+ros2 launch realsense2_camera rs_launch.py pointcloud.enable:=true enable_gyro:=true enable_accel:=true
+
+기본 실행 후 추가로 사용 가능하게 해주는 부분.
+ros2 param set /camera/camera enable_accel true
+ros2 param set /camera/camera enable_gyro true
+
+------------------------------------------
+
+**run**
+ros2 run realsense2_camera realsense2_camera_node
+
+
+PCL 사용 (ROS에 기본적으로 pcl은 설치가 되어있다.) 만약 설치 확인을 원하면 dpkg -l | grep pcl를 치면 pcl과 관련된 라이브러리가 나온다.
+
+****ROS 패키지에서 추가해야할 부분이다.****
+
+------------------------------------------
+xml 파일에서 의존성 추가
+------------------------------------------
+
+<depend>pcl_conversions</depend>
+<depend>pcl_ros</depend>
+
+------------------------------------------
+CmakeLists 파일에서 패키지 찾는 부분 추가
+------------------------------------------
+
+find_package(PCL REQUIRED)
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+
+
+sudo apt install ros-${ROS_DISTRO}-image-transport-plugins
+sudo apt install ros-${ROS_DISTRO}-compressed-image-transport
+sudo apt install ros-${ROS_DISTRO}-compressed-depth-image-transport
